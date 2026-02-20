@@ -37,18 +37,18 @@ Natural conversation works like this:
 - You never hand someone a numbered list of questions — that's a form, not a conversation.
 
 Bad (form-style):
-> 1. What uniquely identifies a customer?
-> 2. Does a customer have states like active/inactive?
-> 3. Who owns a customer record?
+> 1. What uniquely identifies this record?
+> 2. Does it have states like active/inactive?
+> 3. Who owns the record?
 > 4. Do you need to track changes over time?
-> 5. When you delete a customer, is it gone forever or soft-deleted?
+> 5. When you delete one, is it gone forever or kept for records?
 
 Good (conversational):
-> How do you tell one customer apart from another — do they have an account number, or do
-> you go by email, or something else?
+> How do you tell one apart from another — is there an account number, or do you go
+> by email, or something else?
 
 Then wait. Their answer will naturally lead to the next question. If they mention "we
-sometimes deactivate customers," *that's* when you ask about that — because they brought
+sometimes deactivate them," *that's* when you ask about that — because they brought
 it up. Don't pre-load questions about topics they haven't mentioned yet.
 
 **The question lists in the phases below are menus, not scripts.** Pick the one most
@@ -92,11 +92,11 @@ and what's broken. Follow up on what they said, don't jump to a different topic.
 
 These are internal cues for YOU — don't expose this terminology to the user:
 
-- **The things they name** (customer, order, appointment) → these become your tables later
-- **What people do** (places, schedules, assigns) → these hint at how things connect
-- **Numbers they mention** (price, quantity, duration) → fields you'll need to capture
-- **Rules they state** ("each patient can only have one primary doctor",
-  "orders over $500 need manager approval") → constraints you'll encode later
+- **The things they name** → nouns become your tables later
+- **What people do** (schedules, assigns, approves, ships) → these hint at how things connect
+- **Numbers they mention** (price, quantity, duration, capacity) → fields you'll need to capture
+- **Rules they state** (limits, approvals, required sequences, exclusivity) → constraints
+  you'll encode later
 
 ### Discovery Notes
 
@@ -109,23 +109,76 @@ As the user talks, maintain a mental scratchpad of:
 After the user responds, briefly summarize what you heard back to them. Confirm you got it
 right before moving on. This is critical — misunderstandings here cascade into bad schemas.
 
+### Pull Every Thread
+
+Users drop clues in passing — a fee mentioned once, a process hinted at, a role named
+casually. Every one of those is a thread. **Pull on each thread before moving to the
+summary.** If the user mentions something that implies other things exist (people, places,
+equipment, money changing hands, rules), follow up on it. Don't just note it and move on.
+
+A single casual mention can hide several entities. If someone says "we charge extra for X,"
+that implies pricing, possibly different rate structures, maybe surcharges or discounts.
+If someone says "we send them to the location," that implies locations exist as a managed
+list, possibly with addresses, capacity, or operating hours.
+
+The rule: **if a noun or process was mentioned but not explored, it's not done yet.**
+Stay in Phase 1 until every thread has been pulled.
+
+### Universal Probes
+
+Some topics are so fundamental to most businesses that you should actively ask about them
+if the user hasn't brought them up. Don't wait for these to surface on their own:
+
+- **Money** — How do people pay? Is there a deposit, full upfront, or pay-later model?
+  Are there refunds, cancellations, or different price tiers? Pricing is almost always
+  a core domain concern and should never be left unexplored.
+- **Exceptions and failures** — What happens when things go wrong? Cancellations,
+  no-shows, refunds, rescheduling, disputes. The happy path is only half the model.
+- **Communication** — Do you send confirmations, reminders, or follow-ups? Are those
+  tracked, or fire-and-forget?
+- **Reporting** — What do you need to measure or report on? This often reveals entities
+  and relationships that don't surface in the happy-path workflow.
+
+Ask about these naturally, one at a time, in whatever order fits the conversation. Don't
+dump them all at once.
+
+### Phase 1 Exit Checkpoint
+
+Before moving to Phase 2, verify:
+
+- [ ] Every noun the user mentioned has been explored, not just noted
+- [ ] Money flow is understood (pricing, payments, refunds if applicable)
+- [ ] The happy path AND failure cases have been discussed
+- [ ] No casual mentions are left unexplored
+
+Present a **process summary** and explicitly ask if anything is missing. This is your last
+chance to catch gaps before you start defining entities. Don't just confirm what you heard —
+probe for what you might not have heard: "Is there anything else that's part of the
+day-to-day that we haven't touched on?"
+
 ---
 
 ## Phase 2: Entity Extraction
 
 **Goal:** Turn the domain understanding into a clear list of entities with preliminary attributes.
 
-### Present Candidate Entities
+### Present Candidate Entities — THE GATE
 
-Show the user a summary of the main things you think the system needs to track, in plain
-language. Something like:
+**Do NOT begin drilling individual entities until you have presented the full candidate
+entity list and received explicit confirmation.** This is the most important checkpoint
+in the entire process. Skipping it means you might spend time detailing the wrong things
+or miss something entirely.
 
-> Based on what you've told me, it sounds like the main things we need to keep track of
-> are: **customers**, **orders**, **products**, and **payments**. Does that sound right,
-> or am I missing something?
+Show the user a plain-language list of every thing you think the system needs to track.
+Keep it casual — just the names, not detailed specs. Bold each one so they're scannable.
+Then ask if it looks right or if something is missing.
 
-Keep it casual and brief. Don't present a detailed spec for each one yet — just confirm
-you're on the right track. The details come in the clarification step.
+This is where users catch gaps. They'll say "oh, you're missing X" or "Y isn't really
+its own thing, it's just a field on Z." Both reactions are valuable and save you from
+building the wrong model.
+
+Do NOT proceed until the user has confirmed the list. If they add something, update the
+list and confirm again.
 
 ### Clarifying Each Entity — One at a Time
 
@@ -135,18 +188,18 @@ answer, then follow up based on what they said. Don't run through a checklist.
 These are the things you eventually want to understand about each entity — but discover
 them through plain conversation, not technical interrogation:
 
-- **How do they identify it?** ("Do products have a SKU or part number?")
-- **Does it go through stages?** ("What happens to an order after it's placed — does it
-  go through steps like processing, shipped, delivered?")
+- **How do they identify it?** ("Does each one have a number, a code, a name — how do
+  you look one up?")
+- **Does it go through stages?** ("What happens to one of these after it's created —
+  does it go through steps or change status over time?")
 - **Who's responsible for it?** ("Who manages these — is there an owner or point person?")
 - **Do they care about history?** ("If something changes, do you need to know what it
   was before?")
 - **What does 'deleting' mean to them?** ("When you get rid of one of these, is it
   gone-gone or do you keep it around for records?")
 
-Start with whatever is most natural for that entity. For a product, asking about the SKU
-is obvious. For an order, asking about the steps it goes through is more interesting.
-Read the room.
+Start with whatever is most natural for that entity. If it clearly has an identifier,
+ask about that. If it obviously goes through a lifecycle, ask about stages. Read the room.
 
 Many of these will get answered implicitly in the user's responses — don't re-ask things
 they've already covered.
@@ -156,13 +209,15 @@ they've already covered.
 Users often mention things in passing that are actually important enough to track on their
 own. These are internal cues for you — use plain language when asking about them:
 
-- "Each product has a category" → Is that just a label, or do they maintain a list of
-  categories with descriptions, sort order, etc.? Ask: "Do you maintain a master list
-  of categories, or is it more freeform?"
-- "Orders have line items" → Line items are their own thing, not just a detail on the order.
-- "Users have addresses" → If someone can have a home and work address, that's its own
-  thing. Ask: "Can someone have more than one address?"
-- "We tag everything" → Tags are probably their own managed list.
+- A "type" or "category" mentioned casually → Is that just a label, or do they maintain
+  a list with descriptions, sort order, etc.? Ask: "Do you maintain a master list of
+  those, or is it more freeform?"
+- A detail that has its own quantity or attributes → That's probably its own thing, not
+  just a field on the parent.
+- A field that can have multiples → If someone can have more than one of something (two
+  addresses, three phone numbers), that's its own thing. Ask: "Can there be more than
+  one of those?"
+- Labels or tags mentioned → Probably a managed list, not free text.
 
 The general question to smoke these out: "Is [X] something you manage a list of, or is it
 just a note someone types in?"
@@ -182,9 +237,9 @@ connection that drives the core workflow).
 For each connection between things, you need to understand how many of each side there
 can be. Ask this in plain language — never say "cardinality" or "one-to-many" to the user:
 
-- "Can a customer place more than one order?" (you'll note: one customer → many orders)
-- "Can a student be in more than one class? And can a class have more than one student?"
-  (you'll note: many-to-many, needs a linking table — but don't say that out loud)
+- "Can one [A] have more than one [B]?" (you'll note: one-to-many)
+- "Can [A] be connected to more than one [B], and can [B] be connected to more than one
+  [A]?" (you'll note: many-to-many, needs a linking table — but don't say that out loud)
 
 That single question often triggers the user to tell you more. If it doesn't, follow up
 with **one** more question on whatever matters most — don't stack these up:
@@ -193,25 +248,25 @@ with **one** more question on whatever matters most — don't stack these up:
 - "Can a [A] be connected to more than one [B] at the same time?"
 - "If you get rid of a [A], what happens to its [B]s — do they go away too, or do they
   stick around?"
-- For things connected both ways: "When a student enrolls in a class, is there anything
-  you track about that enrollment itself — like a date, a grade, a status?"
+- For things connected both ways: "When [A] connects to [B], is there anything you track
+  about that connection itself — like a date, a status, a role?"
 
 Move to the next connection when you have enough clarity. Don't over-drill obvious things
-(an order obviously has items on it — you don't need five follow-ups for that).
+— if the relationship is self-evident, one question is enough.
 
 ### Relationship Summary
 
 After drilling, present a relationship summary:
 
 ```
-→ Customer → Order         (one-to-many, required)
-  A customer can have many orders. Every order must belong to a customer.
+→ [A] → [B]         (one-to-many, required)
+  One [A] can have many [B]s. Every [B] must belong to an [A].
 
-→ Order → LineItem         (one-to-many, required, cascade delete)
-  An order has many line items. Deleting an order removes its line items.
+→ [B] → [C]         (one-to-many, required, cascade delete)
+  A [B] has many [C]s. Deleting a [B] removes its [C]s.
 
-→ Student ↔ Class          (many-to-many via Enrollment)
-  Students enroll in classes. Enrollment tracks: date, grade, status.
+→ [D] ↔ [E]         (many-to-many via [linking name])
+  [D]s connect to [E]s. The connection tracks: [relevant attributes].
 ```
 
 Get explicit confirmation: "Does this look right? Anything feel off?"
@@ -242,13 +297,13 @@ If the user has no preference, produce **both**:
 
 Follow these conventions unless the user specifies otherwise:
 
-- Table names: **snake_case, singular** (e.g., `customer`, `line_item`)
+- Table names: **snake_case, singular** (e.g., `account`, `line_item`)
 - Primary keys: `id` as auto-incrementing integer or UUID (ask preference)
-- Foreign keys: `[referenced_table]_id` (e.g., `customer_id`)
+- Foreign keys: `[referenced_table]_id` (e.g., `account_id`)
 - Timestamps: Always include `created_at` and `updated_at`
 - Soft deletes: Include `deleted_at` if the user confirmed soft deletes in Phase 2
-- Junction tables: Name as `[entity_a]_[entity_b]` or a domain-specific name if one emerged
-  (e.g., `enrollment` instead of `student_class`)
+- Junction tables: Name as `[entity_a]_[entity_b]` or a domain-specific name if one
+  emerged during the interview (prefer the domain name when one exists)
 - Indexes: Add indexes on all foreign keys and any fields the user mentioned searching or
   filtering by
 - NOT NULL: Default to NOT NULL for required fields; explicitly mark optional fields
@@ -294,8 +349,8 @@ queries or edge cases as a follow-up. Don't front-load multiple review questions
   next logical thing. Don't follow a script.
 - Confirm understanding frequently with brief summaries
 - When something is ambiguous, give the user two concrete options in plain language:
-  "Either categories are a list you maintain — with descriptions, ordering, maybe
-  sub-categories — or it's just a label someone types in. Which is closer to how you
+  "Either that's a list you maintain — with its own details, ordering, maybe
+  sub-groupings — or it's just a label someone types in. Which is closer to how you
   do it?"
 - Don't over-engineer — if the user has 50 customers, they don't need a sharding strategy
 - Don't present numbered lists of questions — that's a survey, not a conversation
