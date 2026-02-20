@@ -277,21 +277,30 @@ Get explicit confirmation: "Does this look right? Anything feel off?"
 
 **Goal:** Produce the final data model in the user's preferred format.
 
-### Ask for Target (if not already known)
+### Choose a Database
 
-Ask one question to cover the essentials — people usually know what they want here:
+Use AskUserQuestion to let the user pick their target database. Offer the most common
+options and include a "help me choose" option for users who aren't sure:
 
-- "What database are you targeting, and do you want raw SQL, a Mermaid ERD, or both?"
+- **PostgreSQL** — Most popular open-source option, great all-around choice
+- **MySQL** — Widely supported, common in shared hosting and legacy systems
+- **SQLite** — Lightweight, no server needed, good for embedded or small-scale apps
+- **Help me choose** — If they pick this, ask a few quick questions about their setup
+  (scale, hosting, team experience) and recommend one. Keep it brief.
 
 If they don't mention naming conventions (snake_case, singular vs plural), just use the
 defaults and mention what you chose when you present the schema.
 
-### Default Output Format
+### Output Format
 
-If the user has no preference, produce **both**:
+Always produce **all three** — don't ask:
 
 1. **Mermaid ERD** — visual relationship diagram (save as `.mermaid` file)
-2. **SQL DDL** — complete CREATE TABLE statements (save as `.sql` file)
+2. **SQL DDL** — complete CREATE TABLE statements for the chosen database (save as `.sql` file)
+3. **Interview transcript** — a clean summary of the full discovery conversation: what the
+   user said, what was confirmed, key business rules, and decisions made. Save as `.md` file.
+   This serves as the "why" behind the schema — anyone reading the schema later can trace
+   every table and constraint back to a real business requirement.
 
 ### Schema Generation Rules
 

@@ -1,0 +1,149 @@
+erDiagram
+    customer {
+        int id PK
+        text name
+        text phone
+        text area
+        text address
+    }
+
+    dog {
+        int id PK
+        int customer_id FK
+        text name
+        text breed
+        int size_bracket_id FK
+        text photo_url
+        text temperament
+        text allergies
+        text snack_restrictions
+        text grooming_preferences
+    }
+
+    groomer {
+        int id PK
+        text name
+        text phone
+        text service_area
+        int active
+    }
+
+    van {
+        int id PK
+        text name
+        int current_groomer_id FK
+    }
+
+    size_bracket {
+        int id PK
+        text label
+        int min_weight_lbs
+        int max_weight_lbs
+    }
+
+    service_tier {
+        int id PK
+        text name
+        text description
+        int estimated_duration_minutes
+    }
+
+    service_tier_price {
+        int id PK
+        int service_tier_id FK
+        int size_bracket_id FK
+        int price_cents
+    }
+
+    add_on {
+        int id PK
+        text name
+        int price_cents
+        int active
+    }
+
+    appointment {
+        int id PK
+        int customer_id FK
+        int groomer_id FK
+        int van_id FK
+        text address
+        text scheduled_date
+        text scheduled_time
+        int estimated_duration_minutes
+        text status
+        text notes
+    }
+
+    appointment_line_item {
+        int id PK
+        int appointment_id FK
+        int dog_id FK
+        int service_tier_id FK
+        int quoted_price_cents
+        text notes
+    }
+
+    line_item_add_on {
+        int id PK
+        int appointment_line_item_id FK
+        int add_on_id FK
+        int price_cents
+    }
+
+    price_adjustment {
+        int id PK
+        int appointment_line_item_id FK
+        int original_price_cents
+        int adjusted_price_cents
+        text reason
+        int customer_approved
+    }
+
+    payment {
+        int id PK
+        int appointment_id FK
+        int amount_cents
+        text method
+        text status
+        text paid_at
+    }
+
+    appointment_photo {
+        int id PK
+        int appointment_id FK
+        int dog_id FK
+        text photo_url
+        text photo_type
+    }
+
+    expense {
+        int id PK
+        int groomer_id FK
+        int van_id FK
+        int amount_cents
+        text expense_type
+        text description
+        text receipt_photo_url
+        text expense_date
+        int reimbursed
+    }
+
+    customer ||--o{ dog : "has"
+    customer ||--o{ appointment : "books"
+    dog }o--|| size_bracket : "weighs"
+    groomer ||--o| van : "assigned"
+    groomer ||--o{ appointment : "performs"
+    van ||--o{ appointment : "used in"
+    appointment ||--|{ appointment_line_item : "includes"
+    dog ||--o{ appointment_line_item : "groomed in"
+    service_tier ||--o{ appointment_line_item : "priced by"
+    service_tier ||--|{ service_tier_price : "has prices"
+    size_bracket ||--o{ service_tier_price : "for size"
+    appointment_line_item ||--o{ line_item_add_on : "extras"
+    add_on ||--o{ line_item_add_on : "applied as"
+    appointment_line_item ||--o| price_adjustment : "adjusted"
+    appointment ||--|| payment : "paid via"
+    appointment ||--o{ appointment_photo : "documented"
+    groomer ||--o{ expense : "submits"
+    van ||--o{ expense : "charged to"
