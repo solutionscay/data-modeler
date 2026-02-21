@@ -6,7 +6,7 @@ A Claude Code skill that designs database schemas through natural conversation. 
 
 - Asks about your business, one question at a time, like a good analyst would
 - Identifies the things your system needs to track and how they connect
-- Produces a complete SQL schema and Mermaid ERD when it has enough understanding
+- Produces three deliverables: a Mermaid ERD, a complete SQL schema, and an interview document that traces every table back to a real business requirement
 - Targets Postgres, MySQL, SQLite, or whatever you're using
 
 ## Install
