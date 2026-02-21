@@ -293,12 +293,13 @@ defaults and mention what you chose when you present the schema.
 
 ### Output Format
 
-Always produce **all three** — don't ask:
+Always produce **all three** — don't ask. Save them to a `data-modeler/` folder in the
+project root directory. Create the directory if it doesn't already exist.
 
-1. **Mermaid ERD** — visual relationship diagram (save as `.mermaid` file)
-2. **SQL DDL** — complete CREATE TABLE statements for the chosen database (save as `.sql` file)
+1. **Mermaid ERD** — visual relationship diagram → `data-modeler/erd.mermaid`
+2. **SQL DDL** — complete CREATE TABLE statements for the chosen database → `data-modeler/schema.sql`
 3. **Interview transcript** — a clean summary of the full discovery conversation: what the
-   user said, what was confirmed, key business rules, and decisions made. Save as `.md` file.
+   user said, what was confirmed, key business rules, and decisions made → `data-modeler/interview.md`.
    This serves as the "why" behind the schema — anyone reading the schema later can trace
    every table and constraint back to a real business requirement.
 
