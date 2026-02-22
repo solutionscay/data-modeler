@@ -24,7 +24,8 @@ Bad data models come from assumptions. Good ones come from questions.
 This skill treats data modeling as a conversation, not a code generation task. The goal is to
 understand the *business* first, then translate that understanding into a precise relational
 model. Every entity, every relationship, every constraint should trace back to a real business
-rule the user confirmed.
+rule the user confirmed. For a complete example of this process in action, see
+`examples/dog-groomer/interview.md`.
 
 ### Conversational Pacing — THE #1 RULE
 
@@ -67,6 +68,24 @@ Phase 2: Entity Extraction   → Identify the nouns and their boundaries
 Phase 3: Relationship Drill  → Clarify every connection with specific questions
 Phase 4: Schema Output       → Produce the final model with full confidence
 ```
+
+### Resuming an Interrupted Session
+
+The interview transcript is only written at the end (Phase 4), so mid-interview progress
+lives in the conversation history, not on disk. If a session is interrupted:
+
+1. **Check for prior outputs** — if `data-modeler/` already contains `schema.sql` or
+   `erd.mermaid`, a previous session completed Phase 4. Read those files and ask the user
+   what they want to change rather than re-interviewing from scratch.
+2. **Check conversation history** — if this is the same conversation (or the user pastes
+   context from a previous one), review what was already discussed and summarize it back.
+   Ask the user to confirm it's still accurate before continuing from where you left off.
+3. **If neither exists** — the user may describe where they were ("we already talked about
+   the entities"). Ask them to summarize what was covered, confirm your understanding, and
+   pick up from the appropriate phase.
+
+Don't re-ask questions the user has already answered. If you're unsure how far the previous
+session got, just ask: "How far did we get last time?"
 
 ---
 
@@ -150,6 +169,13 @@ Before moving to Phase 2, verify:
 - [ ] Money flow is understood (pricing, payments, refunds if applicable)
 - [ ] The happy path AND failure cases have been discussed
 - [ ] No casual mentions are left unexplored
+- [ ] Domain patterns reviewed — if the domain matches a known pattern in `domain-patterns.md`,
+      scan it for questions or entities you may have missed
+
+Once you know the domain, read `domain-patterns.md` and look for a matching pattern. If one
+exists, scan its "Common Questions to Ask" list — these are threads worth pulling if they
+haven't come up yet. Don't ask all of them; just check whether any reveal gaps in what you've
+already covered. If the domain doesn't match any pattern, skip this step.
 
 Present a **process summary** and explicitly ask if anything is missing. This is your last
 chance to catch gaps before you start defining entities. Don't just confirm what you heard —
@@ -254,6 +280,17 @@ with **one** more question on whatever matters most — don't stack these up:
 Move to the next connection when you have enough clarity. Don't over-drill obvious things
 — if the relationship is self-evident, one question is enough.
 
+### Large Domains (20+ Entities)
+
+When the entity list is large, drilling every relationship one by one gets exhausting for the
+user. Instead, group entities into subdomains — clusters of things that are closely related
+(e.g., "ordering and fulfillment," "people and roles," "billing and payments"). Drill the
+relationships within each group first, then drill the connections between groups.
+
+Present the groupings to the user before you start drilling: "I'm going to break these into
+a few groups so we can tackle them one cluster at a time — does this grouping make sense?"
+This gives the user a sense of progress and keeps each segment focused.
+
 ### Relationship Summary
 
 After drilling, present a relationship summary:
@@ -303,6 +340,10 @@ project root directory. Create the directory if it doesn't already exist.
    This serves as the "why" behind the schema — anyone reading the schema later can trace
    every table and constraint back to a real business requirement.
 
+For a reference example of all three deliverables, see `examples/dog-groomer/` — it contains
+an interview transcript, ERD, and schema for a mobile dog grooming business. Use it to calibrate
+the depth and format of your outputs.
+
 ### Schema Generation Rules
 
 Follow these conventions unless the user specifies otherwise:
@@ -331,6 +372,16 @@ Before presenting the final schema, verify:
 - [ ] All business rules from Phase 1 are encoded as constraints where possible
 - [ ] Indexes exist on FKs and common lookup fields
 - [ ] Timestamps included on all tables
+
+### Validate the SQL
+
+After generating the DDL, try to run it to verify it parses without errors. If the target
+database is SQLite, execute the SQL against an in-memory database. For other databases, use
+any available local tooling to syntax-check it. If no tooling is available, do a careful manual
+review of the DDL for syntax issues — mismatched parentheses, missing commas, invalid type
+names for the target database.
+
+Fix any errors before presenting the schema to the user.
 
 ### Present and Iterate
 
@@ -399,6 +450,6 @@ If the system serves more than one company:
 
 ## Reference: Common Domain Patterns
 
-Read `domain-patterns.md` for pre-built patterns for common business domains
-(e-commerce, SaaS, medical, legal, scheduling, etc.) that can accelerate the interview
-when the user's domain matches a known pattern.
+`domain-patterns.md` contains pre-built patterns for common business domains (e-commerce, SaaS,
+medical, legal, scheduling, CRM, inventory). Consult it during the Phase 1 exit checkpoint —
+see that section for details on when and how to use it.

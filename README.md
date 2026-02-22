@@ -23,3 +23,4 @@ Then tell Claude you need help with a database, or just say `/data-modeler`.
 
 - `SKILL.md` — the skill definition (interview process, schema rules, tone)
 - `domain-patterns.md` — reference patterns for common domains (e-commerce, SaaS, healthcare, legal, scheduling, CRM, inventory)
+- `examples/` — sample outputs (dog grooming business) showing the interview transcript, ERD, and schema
