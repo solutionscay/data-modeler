@@ -19,23 +19,14 @@ before producing any schema.
 
 ## Philosophy
 
-Bad data models come from assumptions. Good ones come from questions.
-
-This skill treats data modeling as a conversation, not a code generation task. The goal is to
-understand the *business* first, then translate that understanding into a precise relational
-model. Every entity, every relationship, every constraint should trace back to a real business
-rule the user confirmed. For a complete example of this process in action, see
-`examples/dog-groomer/interview.md`.
+Bad data models come from assumptions. Good ones come from questions. This skill treats data
+modeling as a conversation, not a code generation task — understand the business first, then
+translate to a relational model. For a complete example, see `examples/dog-groomer/interview.md`.
 
 ### Conversational Pacing — THE #1 RULE
 
 **Ask ONE question at a time.** Occasionally two, if they're tightly related to the same
 topic. Never three or more. This is non-negotiable.
-
-Natural conversation works like this:
-- You ask something. They answer. You respond to what they said. You ask the next thing.
-- Each question builds on what you just learned.
-- You never hand someone a numbered list of questions — that's a form, not a conversation.
 
 Bad (form-style):
 > 1. What uniquely identifies this record?
@@ -119,29 +110,15 @@ These are internal cues for YOU — don't expose this terminology to the user:
 
 ### Discovery Notes
 
-As the user talks, maintain a mental scratchpad of:
-- Candidate entities (don't commit yet)
-- Implied relationships
-- Business rules and constraints
-- Ambiguities to clarify later
-
-After the user responds, briefly summarize what you heard back to them. Confirm you got it
-right before moving on. This is critical — misunderstandings here cascade into bad schemas.
+Maintain a mental scratchpad of: candidate entities, implied relationships, business rules,
+ambiguities. After the user responds, briefly summarize what you heard back to confirm.
 
 ### Pull Every Thread
 
-Users drop clues in passing — a fee mentioned once, a process hinted at, a role named
-casually. Every one of those is a thread. **Pull on each thread before moving to the
-summary.** If the user mentions something that implies other things exist (people, places,
-equipment, money changing hands, rules), follow up on it. Don't just note it and move on.
-
-A single casual mention can hide several entities. If someone says "we charge extra for X,"
-that implies pricing, possibly different rate structures, maybe surcharges or discounts.
-If someone says "we send them to the location," that implies locations exist as a managed
-list, possibly with addresses, capacity, or operating hours.
-
-The rule: **if a noun or process was mentioned but not explored, it's not done yet.**
-Stay in Phase 1 until every thread has been pulled.
+**If a noun or process was mentioned but not explored, it's not done yet.** A casual mention
+can hide several entities — "we charge extra for X" implies pricing, rate structures, maybe
+discounts. "We send them to the location" implies locations as a managed list with addresses,
+capacity, hours. Follow up on every clue before moving to the summary.
 
 ### Universal Probes
 
@@ -169,18 +146,11 @@ Before moving to Phase 2, verify:
 - [ ] Money flow is understood (pricing, payments, refunds if applicable)
 - [ ] The happy path AND failure cases have been discussed
 - [ ] No casual mentions are left unexplored
-- [ ] Domain patterns reviewed — if the domain matches a known pattern in `domain-patterns.md`,
-      scan it for questions or entities you may have missed
+- [ ] Domain patterns reviewed — read `domain-patterns.md`, find a matching pattern if one
+      exists, scan its "Common Questions to Ask" for gaps in what you've covered
 
-Once you know the domain, read `domain-patterns.md` and look for a matching pattern. If one
-exists, scan its "Common Questions to Ask" list — these are threads worth pulling if they
-haven't come up yet. Don't ask all of them; just check whether any reveal gaps in what you've
-already covered. If the domain doesn't match any pattern, skip this step.
-
-Present a **process summary** and explicitly ask if anything is missing. This is your last
-chance to catch gaps before you start defining entities. Don't just confirm what you heard —
-probe for what you might not have heard: "Is there anything else that's part of the
-day-to-day that we haven't touched on?"
+Present a **process summary** and ask: "Is there anything else that's part of the day-to-day
+that we haven't touched on?"
 
 ---
 
@@ -191,20 +161,12 @@ day-to-day that we haven't touched on?"
 ### Present Candidate Entities — THE GATE
 
 **Do NOT begin drilling individual entities until you have presented the full candidate
-entity list and received explicit confirmation.** This is the most important checkpoint
-in the entire process. Skipping it means you might spend time detailing the wrong things
-or miss something entirely.
+entity list and received explicit confirmation.** Show the user a plain-language list of
+every thing you think the system needs to track — just the names, bolded, no detailed specs.
+Ask if it looks right or if something is missing.
 
-Show the user a plain-language list of every thing you think the system needs to track.
-Keep it casual — just the names, not detailed specs. Bold each one so they're scannable.
-Then ask if it looks right or if something is missing.
-
-This is where users catch gaps. They'll say "oh, you're missing X" or "Y isn't really
-its own thing, it's just a field on Z." Both reactions are valuable and save you from
-building the wrong model.
-
-Do NOT proceed until the user has confirmed the list. If they add something, update the
-list and confirm again.
+Do NOT proceed until the user has confirmed the list. If they add something, update and
+confirm again.
 
 ### Clarifying Each Entity — One at a Time
 
@@ -232,8 +194,7 @@ they've already covered.
 
 ### Watch for Hidden Entities
 
-Users often mention things in passing that are actually important enough to track on their
-own. These are internal cues for you — use plain language when asking about them:
+Internal cues — use plain language when asking about them:
 
 - A "type" or "category" mentioned casually → Is that just a label, or do they maintain
   a list with descriptions, sort order, etc.? Ask: "Do you maintain a master list of
@@ -396,25 +357,15 @@ queries or edge cases as a follow-up. Don't front-load multiple review questions
 
 ## Tone and Style
 
-- **Be a people person, not a tech person.** You're a business analyst having a
-  conversation, not a DBA conducting a requirements spec. Keep database jargon out of
-  your questions entirely — figure out the technical implications silently.
+- **Be a people person, not a tech person.** Keep database jargon out of your questions —
+  figure out the technical implications silently.
 - Never say: "entity", "cardinality", "one-to-many", "foreign key", "junction table",
-  "nullable", "polymorphic", "soft delete", "natural key", "cascade", "constraint" in
-  your questions. These are internal concepts you use when building the schema — the user
-  doesn't need to hear them.
+  "nullable", "polymorphic", "soft delete", "natural key", "cascade", "constraint"
 - Use the user's language — if they say "gig" instead of "job", use "gig"
-- **ONE question per message.** Two max, and only if they're about the same thing. NEVER
-  more. This is the most important style rule.
-- Let the user's answers drive the conversation — react to what they said, then ask the
-  next logical thing. Don't follow a script.
-- Confirm understanding frequently with brief summaries
-- When something is ambiguous, give the user two concrete options in plain language:
+- When something is ambiguous, give two concrete options in plain language:
   "Either that's a list you maintain — with its own details, ordering, maybe
-  sub-groupings — or it's just a label someone types in. Which is closer to how you
-  do it?"
+  sub-groupings — or it's just a label someone types in. Which is closer?"
 - Don't over-engineer — if the user has 50 customers, they don't need a sharding strategy
-- Don't present numbered lists of questions — that's a survey, not a conversation
 
 ---
 
@@ -446,10 +397,3 @@ If the system serves more than one company:
 - Ask: "Does each organization see only their own stuff, or is there anything shared
   across organizations?"
 
----
-
-## Reference: Common Domain Patterns
-
-`domain-patterns.md` contains pre-built patterns for common business domains (e-commerce, SaaS,
-medical, legal, scheduling, CRM, inventory). Consult it during the Phase 1 exit checkpoint —
-see that section for details on when and how to use it.
