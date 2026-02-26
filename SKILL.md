@@ -2,13 +2,7 @@
 name: data-modeler
 description: >
   Interactive data modeling skill that discovers business domains through structured interviews,
-  clarifies entity relationships, and produces clean database schemas. Use this skill whenever
-  the user mentions data modeling, database design, schema design, ERDs, entity relationships,
-  database architecture, or wants to plan the data layer for any application. Also trigger when
-  the user says things like "I need a database for...", "what tables do I need", "help me
-  model...", "design my schema", or describes a business process that implies structured data.
-  Even if they just describe a business idea and you suspect they'll need a data model, suggest
-  using this skill.
+  clarifies entity relationships, and produces clean database schemas.
 ---
 
 # Data Modeler
